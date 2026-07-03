@@ -51,11 +51,3 @@ mvn spring-boot:run
 ```
 
 Then visit http://localhost:8080
-
-## Note on verification
-
-This was built and reviewed carefully against the original TypeScript source,
-but this sandbox doesn't have access to Maven Central, so the build could
-not be compiled/run here. Please run `mvn clean install` on your machine
-as a first step and let me know if anything doesn't compile — happy to fix
-it up.
