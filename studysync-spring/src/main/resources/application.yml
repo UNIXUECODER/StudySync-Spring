@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: studysync
+  thymeleaf:
+    cache: false
+
+server:
+  port: 8080
+
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  model: gemini-2.5-flash-lite
+  base-url: https://generativelanguage.googleapis.com
+
+logging:
+  level:
+    com.studysync: INFO

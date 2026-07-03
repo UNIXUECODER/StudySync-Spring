@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>StudySync</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<div class="dashboardLayout">
+    <aside class="sidebar">
+        <div class="logo">
+            <h2>StudySync</h2>
+        </div>
+
+        <nav class="nav">
+            <button type="button"
+                    data-tab="generate"
+                    th:classappend="${activeTab == 'generate'} ? 'navItemActive' : ''"
+                    class="navItem">
+                <span>📝</span> Generate Plan
+            </button>
+
+            <button type="button"
+                    data-tab="overview"
+                    th:disabled="${plan == null}"
+                    th:classappend="|${activeTab == 'overview' ? 'navItemActive' : ''} ${plan == null ? 'navItemDisabled' : ''}|"
+                    class="navItem">
+                <span>🏠</span> Overview
+            </button>
+
+            <button type="button"
+                    data-tab="syllabus"
+                    th:disabled="${plan == null}"
+                    th:classappend="|${activeTab == 'syllabus' ? 'navItemActive' : ''} ${plan == null ? 'navItemDisabled' : ''}|"
+                    class="navItem">
+                <span>📚</span> Syllabus
+            </button>
+
+            <button type="button"
+                    data-tab="timeline"
+                    th:disabled="${plan == null}"
+                    th:classappend="|${activeTab == 'timeline' ? 'navItemActive' : ''} ${plan == null ? 'navItemDisabled' : ''}|"
+                    class="navItem">
+                <span>📅</span> Timeline
+            </button>
+
+            <button type="button"
+                    data-tab="strategies"
+                    th:disabled="${plan == null}"
+                    th:classappend="|${activeTab == 'strategies' ? 'navItemActive' : ''} ${plan == null ? 'navItemDisabled' : ''}|"
+                    class="navItem">
+                <span>💡</span> Strategies
+            </button>
+        </nav>
+
+        <div style="font-size: 0.8rem; color: #94a3b8; text-align: center;">
+            Powered by Gemini 2.5
+        </div>
+    </aside>
+
+    <main class="mainContent">
+
+        <!-- Generate Plan tab -->
+        <div data-tab-panel="generate"
+             th:classappend="${activeTab == 'generate'} ? 'tabPanelActive' : ''"
+             class="tabPanel">
+            <div class="card">
+                <header class="header">
+                    <h1>Create New Plan</h1>
+                    <p>Tell us about your goal and we'll build the roadmap.</p>
+                </header>
+
+                <form th:action="@{/generate-plan}" th:object="${planRequest}" method="post" class="form">
+                    <div class="field">
+                        <label for="exam">Which exam are you preparing for?</label>
+                        <input id="exam" type="text" th:field="*{examName}"
+                               placeholder="e.g. SAT, GRE, UPSC, AWS Certified..."/>
+                        <p class="errorText" th:if="${#fields.hasErrors('examName')}" th:errors="*{examName}"></p>
+                    </div>
+
+                    <div class="grid">
+                        <div class="field">
+                            <label for="time">Preparation Time</label>
+                            <select id="time" th:field="*{timeAvailable}">
+                                <option value="2 weeks">2 Weeks (Crash Course)</option>
+                                <option value="1 month">1 Month</option>
+                                <option value="3 months">3 Months</option>
+                                <option value="6 months">6 Months</option>
+                                <option value="1 year">1 Year</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label for="level">Current Proficiency</label>
+                            <select id="level" th:field="*{proficiency}">
+                                <option value="Beginner">Beginner (New to this)</option>
+                                <option value="Intermediate">Intermediate (Basic knowledge)</option>
+                                <option value="Advanced">Advanced (Reviewing topics)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submitBtn">Generate Study Plan</button>
+                    <p class="errorText" th:if="${error}" th:text="${error}"></p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Overview tab -->
+        <div th:if="${plan != null}"
+             data-tab-panel="overview"
+             th:classappend="${activeTab == 'overview'} ? 'tabPanelActive' : ''"
+             class="tabPanel">
+            <div class="resultContainer">
+                <div class="planHeader">
+                    <h2 th:text="${plan.examTitle()}"></h2>
+                    <p th:text="${plan.overview()}"></p>
+                </div>
+                <div class="card">
+                    <h3>Next Steps</h3>
+                    <p>Navigate through the sidebar to see your detailed syllabus, weekly timeline, and specific
+                        strategies for success.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Syllabus tab -->
+        <div th:if="${plan != null}"
+             data-tab-panel="syllabus"
+             th:classappend="${activeTab == 'syllabus'} ? 'tabPanelActive' : ''"
+             class="tabPanel">
+            <div class="section">
+                <h3>Syllabus Breakdown</h3>
+                <div class="grid">
+                    <div class="syllabusCard" th:each="item : ${plan.syllabus()}">
+                        <h4 th:text="${item.subject()}"></h4>
+                        <ul class="subtopics">
+                            <li th:each="sub : ${item.subtopics()}" th:text="${sub}"></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline tab -->
+        <div th:if="${plan != null}"
+             data-tab-panel="timeline"
+             th:classappend="${activeTab == 'timeline'} ? 'tabPanelActive' : ''"
+             class="tabPanel">
+            <div class="section">
+                <h3>Study Timeline</h3>
+                <div class="timelineContainer">
+                    <div class="timelineItem" th:each="milestone : ${plan.schedule()}">
+                        <div class="timeMarker" th:text="${milestone.timeframe()}"></div>
+                        <div class="goalsList">
+                            <ul class="subtopics">
+                                <li th:each="goal : ${milestone.goals()}" th:text="${goal}"></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Strategies tab -->
+        <div th:if="${plan != null}"
+             data-tab-panel="strategies"
+             th:classappend="${activeTab == 'strategies'} ? 'tabPanelActive' : ''"
+             class="tabPanel">
+            <div class="section">
+                <h3>Success Strategies &amp; Tips</h3>
+                <div class="tipsList">
+                    <div class="tipItem" th:each="tip : ${plan.tips()}">
+                        <strong>Strategist Tip:</strong> <span th:text="${tip}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script th:src="@{/js/tabs.js}"></script>
+</body>
+</html>
